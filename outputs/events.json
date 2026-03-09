@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "timestamp": "2026-03-05 14:00",
+    "speaker": "张三",
+    "event_type": "decision",
+    "content": "我们计划 4 月 10 日前上线新支付功能，客户催得紧。",
+    "importance": 4,
+    "source_chunk_id": 0
+  },
+  {
+    "id": 2,
+    "timestamp": "2026-03-05 14:00",
+    "speaker": "王五",
+    "event_type": "decision",
+    "content": "那就定 4 月 10 日为目标，但需要本周五前确认接口清单。",
+    "importance": 4,
+    "source_chunk_id": 0
+  },
+  {
+    "id": 3,
+    "timestamp": "2026-03-05 14:00",
+    "speaker": "李四",
+    "event_type": "todo",
+    "content": "李四你负责接口清单。",
+    "importance": 3,
+    "source_chunk_id": 0
+  },
+  {
+    "id": 4,
+    "timestamp": "2026-03-05 14:30",
+    "speaker": "王五",
+    "event_type": "risk",
+    "content": "风控那边说要加人脸校验，工期会多两周。",
+    "importance": 3,
+    "source_chunk_id": 0
+  },
+  {
+    "id": 5,
+    "timestamp": "2026-03-05 14:30",
+    "speaker": "王五",
+    "event_type": "decision",
+    "content": "那就先上基础支付，人脸校验放到 4 月底迭代。",
+    "importance": 4,
+    "source_chunk_id": 0
+  }
+]

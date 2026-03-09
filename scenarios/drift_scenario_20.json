@@ -1,0 +1,16 @@
+{
+  "name": "drift_scenario_20",
+  "description": "部分覆盖：先定正式日，再补阶段与范围，不能丢任一维度",
+  "tags": ["partial_override"],
+  "turns": [
+    {"role": "user", "content": "正式版 4 月 10 日上线。"},
+    {"role": "assistant", "content": "收到，4 月 10 日正式版。"},
+    {"role": "user", "content": "不对，先上 beta，正式版改 4 月 20 日。"},
+    {"role": "assistant", "content": "明白，先 beta，正式 4 月 20 日。"},
+    {"role": "user", "content": "beta 只对内部开放，正式版再对外。"},
+    {"role": "assistant", "content": "已记：beta 仅内部，正式对外。"}
+  ],
+  "question": "当前上线计划（阶段、日期、范围）？",
+  "expected_key_facts": ["beta", "4月20日", "内部", "正式"],
+  "expected_avoid": ["4月10日"]
+}

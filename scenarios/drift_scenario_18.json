@@ -1,0 +1,14 @@
+{
+  "name": "drift_scenario_18",
+  "description": "打断 + 否定：说一半被确认，随后否定并给出正确结论",
+  "tags": ["interruption", "negation"],
+  "turns": [
+    {"role": "user", "content": "发布会就定在——"},
+    {"role": "assistant", "content": "收到，发布会日期已记。"},
+    {"role": "user", "content": "别记，我没说完。不是 5 月，改 6 月 15 日，场地也改到上海。"},
+    {"role": "assistant", "content": "明白，发布会 6 月 15 日，上海。"}
+  ],
+  "question": "发布会时间和地点？",
+  "expected_key_facts": ["6月15日", "上海"],
+  "expected_avoid": ["5月"]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "drift_scenario_02",
+  "description": "冲突场景：地点前后矛盾",
+  "turns": [
+    {"role": "user", "content": "我住在新加坡。"},
+    {"role": "assistant", "content": "好的，您在新加坡。"},
+    {"role": "user", "content": "我住在东京。"},
+    {"role": "assistant", "content": "已更新，您在东京。"}
+  ],
+  "question": "用户当前所在地是哪里？若存在矛盾请说明。",
+  "expected_key_facts": ["东京", "矛盾"],
+  "expect_conflict_detected": true,
+  "description_en": "Conflict: Singapore then Tokyo. Expect conflict or latest."
+}

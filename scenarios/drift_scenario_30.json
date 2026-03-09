@@ -1,0 +1,16 @@
+{
+  "name": "drift_scenario_30",
+  "description": "temporal drift：「月底前」需结合当前日期锚定到具体日期",
+  "tags": ["temporal_drift", "relative_time"],
+  "turns": [
+    {"role": "user", "content": "月底前上线。"},
+    {"role": "assistant", "content": "收到，月底前。"},
+    {"role": "user", "content": "【当前日期：2026年3月8日】月底前具体是几号？还剩几天？"},
+    {"role": "assistant", "content": "3月31日前，还剩23天。"}
+  ],
+  "question": "月底前具体是几号？",
+  "expected_key_facts": ["3月31日"],
+  "expected_avoid": [],
+  "current_date": "2026-03-08",
+  "notes": "temporal_drift: 3月8日，月底=3/31"
+}

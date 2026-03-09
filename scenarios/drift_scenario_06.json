@@ -1,0 +1,20 @@
+{
+  "name": "drift_scenario_06",
+  "description": "噪声+长距离：负责人早期确定，中间大量无关，后期才更新",
+  "turns": [
+    {"role": "user", "content": "这个项目负责人是张三。"},
+    {"role": "assistant", "content": "收到，负责人张三。"},
+    {"role": "user", "content": "下周一的会取消了吧？"},
+    {"role": "assistant", "content": "对，取消了。"},
+    {"role": "user", "content": "预算表你看过了吗？"},
+    {"role": "assistant", "content": "看过了。"},
+    {"role": "user", "content": "需求文档再改一版。"},
+    {"role": "assistant", "content": "好的。"},
+    {"role": "user", "content": "对了，负责人改成李四了，张三不再负责。"},
+    {"role": "assistant", "content": "已更新，当前负责人李四。"}
+  ],
+  "question": "当前项目负责人是谁？请只回答姓名。",
+  "expected_key_facts": ["李四"],
+  "expected_avoid": ["张三"],
+  "description_en": "Noise + long-distance: owner 张三 early, 李四 late, irrelevant in between."
+}

@@ -1,0 +1,21 @@
+{
+  "name": "drift_scenario_11",
+  "description": "多轮修正链：5 次连续更新，问完整方案；Baseline 易丢中间某步或混回旧版",
+  "turns": [
+    {"role": "user", "content": "v1：正式版 4 月 10 日上线。"},
+    {"role": "assistant", "content": "收到，4 月 10 日正式版。"},
+    {"role": "user", "content": "v2：改成 4 月 20 日。"},
+    {"role": "assistant", "content": "明白，4 月 20 日。"},
+    {"role": "user", "content": "v3：先上 beta，正式版 4 月 20 日。"},
+    {"role": "assistant", "content": "已记：先 beta，正式 4 月 20 日。"},
+    {"role": "user", "content": "v4：beta 只对内部用户开放。"},
+    {"role": "assistant", "content": "收到，beta 仅内部。"},
+    {"role": "user", "content": "v5：正式版推到 4 月 25 日。"},
+    {"role": "assistant", "content": "已更新：正式版 4 月 25 日。"}
+  ],
+  "question": "当前完整上线方案是什么？请包含：是否先 beta、beta 范围、正式版日期。",
+  "expected_key_facts": ["beta", "内部", "4月25日"],
+  "expected_avoid": ["4月10日", "4月20日"],
+  "recent_turns": 6,
+  "description_en": "5-step revision chain. Baseline may drop a step or revert to 4/10 or 4/20."
+}

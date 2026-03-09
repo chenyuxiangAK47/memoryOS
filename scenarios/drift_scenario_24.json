@@ -1,0 +1,14 @@
+{
+  "name": "drift_scenario_24",
+  "description": "多实体同时更新：时间、负责人、地点在一轮或相邻轮内变化",
+  "tags": ["multi_entity"],
+  "turns": [
+    {"role": "user", "content": "评审会 4 月 5 日，负责人老王，在 A 栋。"},
+    {"role": "assistant", "content": "收到。"},
+    {"role": "user", "content": "改了：评审改 4 月 8 日，负责人改成老李，地点改 B 栋 301。"},
+    {"role": "assistant", "content": "已更新：4 月 8 日，老李，B 栋 301。"}
+  ],
+  "question": "评审会的时间、负责人、地点分别是？",
+  "expected_key_facts": ["4月8日", "老李", "B栋301"],
+  "expected_avoid": ["4月5日", "老王", "A栋"]
+}

@@ -1,0 +1,62 @@
+{
+  "source_file": "D:\\Myfile\\memoryos\\测试的markdown\\测试用的markdown.md",
+  "import_mode": "history_import",
+  "chunked": true,
+  "lines_processed": 40442,
+  "chunks": 21,
+  "events_extracted": 6,
+  "constraints_count": 3,
+  "state_updates_count": 0,
+  "conflicts_count": 0,
+  "current_effective_state": [
+    {
+      "key": "event.latest",
+      "value": "当前待定位置为vlandia"
+    }
+  ],
+  "critical_constraints": [
+    "还是只做了加钱加兵但没设置出生点，所以看起来“没生效”",
+    "**建议**：应该将 `ApplyPresetOrigin()` 移到 `OnCharacterCreationIsOver`，`OnSessionLaunch",
+    "2) OnSessionLaunched 只做菜单注册/初始化，不做出身 Apply；"
+  ],
+  "state_updates": [],
+  "conflicts": [],
+  "extracted_events": [
+    {
+      "id": 1,
+      "content": "请Cursor回答侠义骑士node点击后保存的内容及保存位置，必问问题1。",
+      "event_type": "todo",
+      "entity": ""
+    },
+    {
+      "id": 2,
+      "content": "请Cursor回答Apply出身效果在哪个事件执行并检查是否被覆盖，必问问题2。",
+      "event_type": "todo",
+      "entity": ""
+    },
+    {
+      "id": 3,
+      "content": "请Cursor确认ApplySelectedPreset的switch/case是否命中侠义骑士分支，必问问题3。",
+      "event_type": "todo",
+      "entity": ""
+    },
+    {
+      "id": 4,
+      "content": "询问OriginSystemCampaignBehavior是否被AddBehavior进Campaign，强烈建议问。",
+      "event_type": "todo",
+      "entity": ""
+    },
+    {
+      "id": 5,
+      "content": "询问库塞特“逃奴”出生点传送逻辑的执行时机，强烈建议问。",
+      "event_type": "todo",
+      "entity": ""
+    },
+    {
+      "id": 6,
+      "content": "当前待定位置为vlandia",
+      "event_type": "fact",
+      "entity": "location"
+    }
+  ]
+}

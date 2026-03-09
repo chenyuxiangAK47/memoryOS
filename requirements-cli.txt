@@ -1,0 +1,10 @@
+# Memory Guard CLI 最小依赖（prepare / check / run / benchmark）
+# 不含 Streamlit / PostgreSQL / pgvector，仅本地 CLI 测试
+
+# Python 3.10+
+
+# OpenAI
+openai>=1.12.0
+
+# 环境变量
+python-dotenv>=1.0.0

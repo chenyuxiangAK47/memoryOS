@@ -1,0 +1,16 @@
+{
+  "name": "drift_scenario_26",
+  "description": "会后更正：会中结论后被会后一句修正覆盖",
+  "tags": ["post_meeting_correction"],
+  "turns": [
+    {"role": "user", "content": "会上定的，发版 5 月 1 日。"},
+    {"role": "assistant", "content": "收到，5 月 1 日发版。"},
+    {"role": "user", "content": "会议纪要发你了。"},
+    {"role": "assistant", "content": "好的。"},
+    {"role": "user", "content": "刚才会上说的 5 月 1 日作废，改成 5 月 6 日，邮件里已更正。"},
+    {"role": "assistant", "content": "已更新，发版 5 月 6 日。"}
+  ],
+  "question": "当前发版日期是？",
+  "expected_key_facts": ["5月6日"],
+  "expected_avoid": ["5月1日"]
+}

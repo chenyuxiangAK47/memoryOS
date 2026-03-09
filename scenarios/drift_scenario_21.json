@@ -1,0 +1,14 @@
+{
+  "name": "drift_scenario_21",
+  "description": "助手误复述后被用户纠正，应以纠正为准",
+  "tags": ["assistant_misquote"],
+  "turns": [
+    {"role": "user", "content": "先灰度 10% 用户，再全量。"},
+    {"role": "assistant", "content": "收到，先 10% 灰度再全量。"},
+    {"role": "user", "content": "不对，我说的是先 10% 灰度，观察一周，再全量。不是直接全量。"},
+    {"role": "assistant", "content": "更正：10% 灰度 → 观察一周 → 再全量。"}
+  ],
+  "question": "当前灰度发布流程是？",
+  "expected_key_facts": ["10%", "观察一周", "全量"],
+  "expected_avoid": ["直接全量"]
+}

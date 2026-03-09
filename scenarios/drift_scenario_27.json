@@ -1,0 +1,14 @@
+{
+  "name": "drift_scenario_27",
+  "description": "第三方转述 + 范围变化：群里说负责人换了，且只对 beta 生效",
+  "tags": ["third_party_report", "scope_change"],
+  "turns": [
+    {"role": "user", "content": "前端这块目前是小张在跟。"},
+    {"role": "assistant", "content": "收到，小张。"},
+    {"role": "user", "content": "刚群里说小张去别的项目了，前端改由小林负责，但只负责 beta 阶段。"},
+    {"role": "assistant", "content": "已记：beta 阶段前端小林负责。"}
+  ],
+  "question": "当前前端负责人是谁？负责范围是？",
+  "expected_key_facts": ["小林", "beta"],
+  "expected_avoid": ["小张"]
+}

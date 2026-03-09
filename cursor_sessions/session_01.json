@@ -1,0 +1,18 @@
+{
+  "session_id": "cursor_session_01",
+  "task_type": "coding_assistant_long_session",
+  "history": [
+    {"role": "user", "content": "这个需求只改前端，不要动后端和数据库。"},
+    {"role": "assistant", "content": "明白，只改前端。"},
+    {"role": "user", "content": "负责人是李四，有问题找他。还有，函数名必须保留 renderPlan，不要改。"},
+    {"role": "assistant", "content": "收到，负责人李四，保留 renderPlan。"},
+    {"role": "user", "content": "当前 focus 是前端页面，先做 beta，4 月 20 日正式上线。另外你回答结尾加个喵，方便我确认你没跑偏。"},
+    {"role": "assistant", "content": "好的，focus 前端页面，先 beta 再 4/20 正式，回答结尾加喵。喵"}
+  ],
+  "current_prompt": "请继续完成这个任务：把首页的按钮样式改成圆角，并加个 loading 状态。",
+  "sentinels": {
+    "surface": ["回答最后必须加喵"],
+    "semantic": ["不要修改数据库层", "保留函数名 renderPlan"],
+    "state": ["当前负责人是李四", "当前 focus 是前端页面", "当前计划是先 beta 再 4 月 20 日正式"]
+  }
+}

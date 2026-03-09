@@ -1,0 +1,20 @@
+{
+  "name": "drift_scenario_22",
+  "description": "长距离更新：负责人信息在开头，中间大量无关讨论，最后才改",
+  "tags": ["long_distance"],
+  "turns": [
+    {"role": "user", "content": "这个需求由小明负责。"},
+    {"role": "assistant", "content": "收到，小明负责。"},
+    {"role": "user", "content": "我们看下原型吧。"},
+    {"role": "assistant", "content": "好的。"},
+    {"role": "user", "content": "第三页的交互要改。"},
+    {"role": "assistant", "content": "已记。"},
+    {"role": "user", "content": "排期能赶上吗？"},
+    {"role": "assistant", "content": "需要评估。"},
+    {"role": "user", "content": "对了，小明请假了，需求改由小红负责，刚定的。"},
+    {"role": "assistant", "content": "已更新，当前由小红负责。"}
+  ],
+  "question": "当前该需求负责人是谁？",
+  "expected_key_facts": ["小红"],
+  "expected_avoid": ["小明"]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "drift_scenario_07",
+  "description": "多实体更新：上线时间和负责人在不同轮次更新，易漏其一",
+  "turns": [
+    {"role": "user", "content": "上线时间 4 月 10 日，负责人张三。"},
+    {"role": "assistant", "content": "好的，4 月 10 日上线，负责人张三。"},
+    {"role": "user", "content": "上线时间改成 4 月 20 日。"},
+    {"role": "assistant", "content": "明白，4 月 20 日上线。"},
+    {"role": "user", "content": "负责人换成李四了。"},
+    {"role": "assistant", "content": "已更新，负责人李四。"}
+  ],
+  "question": "当前上线时间和负责人分别是什么？请简短回答。",
+  "expected_key_facts": ["4月20日", "李四"],
+  "expected_avoid": ["4月10日", "张三"],
+  "description_en": "Two entities updated at different turns. Baseline may remember one and forget the other."
+}

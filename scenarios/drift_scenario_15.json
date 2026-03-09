@@ -1,0 +1,14 @@
+{
+  "name": "drift_scenario_15",
+  "description": "第三方转述：负责人由群消息更新",
+  "tags": ["third_party_report", "update"],
+  "turns": [
+    {"role": "user", "content": "这个项目负责人是张三。"},
+    {"role": "assistant", "content": "收到，负责人张三。"},
+    {"role": "user", "content": "刚刚李四在群里说了，他接手了，这个项目现在按李四负责。"},
+    {"role": "assistant", "content": "已更新，当前负责人李四。"}
+  ],
+  "question": "当前项目负责人是谁？",
+  "expected_key_facts": ["李四"],
+  "expected_avoid": ["张三"]
+}

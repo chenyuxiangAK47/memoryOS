@@ -1,0 +1,16 @@
+{
+  "name": "drift_scenario_05",
+  "description": "多步演化：不是简单替换，而是多阶段更新，问完整计划含阶段",
+  "turns": [
+    {"role": "user", "content": "正式版 4 月 10 日上线。"},
+    {"role": "assistant", "content": "好的，4 月 10 日正式上线。"},
+    {"role": "user", "content": "改成 4 月 20 日上线。"},
+    {"role": "assistant", "content": "明白，4 月 20 日。"},
+    {"role": "user", "content": "再改一下：先上 beta，正式版 4 月 20 日。"},
+    {"role": "assistant", "content": "已记录：先 beta，正式版 4 月 20 日。"}
+  ],
+  "question": "当前完整上线计划是什么？请包含阶段信息（先什么后什么）。",
+  "expected_key_facts": ["beta", "4月20日", "正式"],
+  "expected_avoid": ["4月10日"],
+  "description_en": "Multi-step evolution. Baseline may drop beta or revert to 4/10."
+}

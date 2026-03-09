@@ -1,0 +1,40 @@
+Add todo list frontend with getTodoList (unchanged signature)
+Add complete checkbox, gray + strikethrough when checked
+正在创建前端待办列表并添加「完成」勾选功能。
+
+getTodoList.js(new)
++14
+/** * 获取待办列表（仅前端 mock，签名不可改） * @returns {Array<{ id: string, title: string }>} */function getTodoList() {  return [
+App.jsx(new)
++44
+import { useState, useMemo } from 'react';import { getTodoList } from './getTodoList';import './App.css';function App() {  const list = useMemo(() => getTodoList(), []);
+App.css(new)
++45
+.app {  max-width: 480px;  margin: 2rem auto;  padding: 1rem;  font-family: sans-serif;}
+main.jsx(new)
++10
+import { StrictMode } from 'react';import { createRoot } from 'react-dom/client';import App from './App.jsx';createRoot(document.getElementById('root')).render(  <StrictMode>
+index.html(new)
++13
+<!DOCTYPE html><html lang="zh-CN">  <head>    <meta charset="UTF-8" />    <meta name="viewport" content="width=device-width, initial-scale=1.0" />    <title>首页待办列表</title>
+package.json(new)
++19
+{  "name": "todo-frontend",  "private": true,  "version": "0.0.1",  "type": "module",  "scripts": {
+vite.config.js(new)
++7
+import { defineConfig } from 'vite';import react from '@vitejs/plugin-react';export default defineConfig({  plugins: [react()],});
+已按你的要求做好，当前实现如下。
+
+本次修改：
+
+在首页待办列表的每一项前增加了「完成」勾选框。
+勾选后：该项文字变灰（color: #999）并带删除线（text-decoration: line-through），由 App.css 里 .todo-item.done .todo-title 控制。
+getTodoList 签名未改：仍为无参、返回 mock 数组，完成状态只在组件内用 useState(completedIds) 维护，没有改 getTodoList 的入参或返回值。
+未动后端和数据库：仅在前端 frontend/ 下用 React + Vite，数据来自 getTodoList() 的 mock 列表。
+涉及文件：
+
+frontend/src/getTodoList.js — 保留原函数名与签名，返回 mock 待办列表。
+frontend/src/App.jsx — 调用 getTodoList 渲染列表，用 checkbox 切换完成状态并加上 done 的 class。
+frontend/src/App.css — 完成态样式：灰字 + 删除线。
+首页已标明负责人王五、截止月底前。本地可进 frontend 执行 npm i 再 npm run dev 看效果。有问题找王五。喵
+

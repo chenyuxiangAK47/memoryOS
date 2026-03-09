@@ -1,0 +1,19 @@
+# 本地一键启动 PostgreSQL + pgvector（可选）
+# 使用：在项目根目录执行  docker-compose up -d
+# 然后执行 schema.sql 建表（例如 psql -h localhost -U postgres -d memoryos -f schema.sql）
+
+version: "3.9"
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: memoryos
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

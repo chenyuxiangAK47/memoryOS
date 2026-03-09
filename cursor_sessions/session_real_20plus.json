@@ -1,0 +1,41 @@
+{
+  "session_id": "cursor_session_real_20plus",
+  "task_type": "coding_assistant_long_session",
+  "description": "模拟 20+ 轮需求变更的长 session：前端小项目，多次改负责人、时间、范围、约束",
+  "history": [
+    {"role": "user", "content": "帮我做一个简单的待办列表页面，只要前端就行。"},
+    {"role": "assistant", "content": "好的，只做前端待办列表。喵"},
+    {"role": "user", "content": "负责人算我的，张三。有问题找我。"},
+    {"role": "assistant", "content": "收到，负责人张三。喵"},
+    {"role": "user", "content": "你先用 React，不要用 Vue。"},
+    {"role": "assistant", "content": "明白，React。喵"},
+    {"role": "user", "content": "截止日期先定下周五吧。"},
+    {"role": "assistant", "content": "下周五截止。喵"},
+    {"role": "user", "content": "对了，你每次回答结尾加个喵，我好确认你没跑偏。"},
+    {"role": "assistant", "content": "好的，之后回答都加喵。喵"},
+    {"role": "user", "content": "我们讨论一下样式，先别写后端。"},
+    {"role": "assistant", "content": "先讨论样式，不写后端。喵"},
+    {"role": "user", "content": "负责人改了，不是我负责了，改成李四。"},
+    {"role": "assistant", "content": "已更新，负责人李四。喵"},
+    {"role": "user", "content": "截止日期延后一点，改成下下周三。"},
+    {"role": "assistant", "content": "截止改为下下周三。喵"},
+    {"role": "user", "content": "不要动数据库，我们只做前端 mock 数据。"},
+    {"role": "assistant", "content": "只做前端 + mock，不动数据库。喵"},
+    {"role": "user", "content": "有个函数名必须保留：getTodoList，别改。"},
+    {"role": "assistant", "content": "保留 getTodoList。喵"},
+    {"role": "user", "content": "当前 focus 就是首页这个列表，别的先不做。"},
+    {"role": "assistant", "content": "focus 首页列表。喵"},
+    {"role": "user", "content": "刚才说的下下周三作废，改成月底前交就行。"},
+    {"role": "assistant", "content": "截止改为月底前。喵"},
+    {"role": "user", "content": "李四说这周他出差，负责人临时换成王五。"},
+    {"role": "assistant", "content": "负责人临时王五。喵"},
+    {"role": "user", "content": "样式先按你说的来，我看看效果再改。"},
+    {"role": "assistant", "content": "好的。喵"}
+  ],
+  "current_prompt": "请继续：给待办项加一个「完成」勾选，勾选后样式变灰并带删除线。不要改 getTodoList 的签名，不要动后端和数据库。",
+  "sentinels": {
+    "surface": ["回答最后必须加喵"],
+    "semantic": ["不要动数据库", "保留函数名 getTodoList", "不要改后端"],
+    "state": ["当前负责人是王五", "当前 focus 是首页待办列表", "当前截止是月底前"]
+  }
+}

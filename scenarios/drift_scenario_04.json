@@ -1,0 +1,24 @@
+{
+  "name": "drift_scenario_04",
+  "description": "长距离更新：旧信息在开头，更新在很后面，中间大量无关对话",
+  "turns": [
+    {"role": "user", "content": "我住在新加坡。"},
+    {"role": "assistant", "content": "好的，您在新加坡。"},
+    {"role": "user", "content": "今天天气不错。"},
+    {"role": "assistant", "content": "是的。"},
+    {"role": "user", "content": "我们讨论一下需求文档吧。"},
+    {"role": "assistant", "content": "可以。"},
+    {"role": "user", "content": "会议改到下午三点。"},
+    {"role": "assistant", "content": "收到。"},
+    {"role": "user", "content": "午饭吃过了吗？"},
+    {"role": "assistant", "content": "吃过了。"},
+    {"role": "user", "content": "那个报表再发我一下。"},
+    {"role": "assistant", "content": "已发。"},
+    {"role": "user", "content": "我上个月搬到东京了，现在住东京。"},
+    {"role": "assistant", "content": "已更新，您目前在东京。"}
+  ],
+  "question": "用户当前所在地是哪里？请只回答当前所在地。",
+  "expected_key_facts": ["东京"],
+  "expected_avoid": [],
+  "description_en": "Long-distance: Singapore at start, Tokyo at end, irrelevant in between. Baseline may cite Singapore."
+}

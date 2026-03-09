@@ -1,0 +1,33 @@
+{
+  "name": "drift_scenario_12",
+  "description": "高频旧状态 + 长距离：负责人张三反复出现，中间大量无关，最后才改李四；Baseline B/C 易只看到最近无关内容或摘要丢更新",
+  "turns": [
+    {"role": "user", "content": "项目负责人是张三。"},
+    {"role": "assistant", "content": "收到，负责人张三。"},
+    {"role": "user", "content": "张三负责这块没问题吧？"},
+    {"role": "assistant", "content": "没问题，张三负责。"},
+    {"role": "user", "content": "需求文档发一下。"},
+    {"role": "assistant", "content": "已发。"},
+    {"role": "user", "content": "负责人还是张三对吧？"},
+    {"role": "assistant", "content": "对，张三。"},
+    {"role": "user", "content": "会议改明天。"},
+    {"role": "assistant", "content": "好的。"},
+    {"role": "user", "content": "预算批了。"},
+    {"role": "assistant", "content": "收到。"},
+    {"role": "user", "content": "张三这边进度如何？"},
+    {"role": "assistant", "content": "张三在跟进。"},
+    {"role": "user", "content": "刚通知，负责人改成李四了，张三不再负责。"},
+    {"role": "assistant", "content": "已更新，当前负责人李四。"},
+    {"role": "user", "content": "报表再发一次。"},
+    {"role": "assistant", "content": "好的。"},
+    {"role": "user", "content": "会议纪要发一下。"},
+    {"role": "assistant", "content": "已发。"},
+    {"role": "user", "content": "下周再对进度。"},
+    {"role": "assistant", "content": "好的。"}
+  ],
+  "question": "当前项目负责人是谁？请只回答姓名。",
+  "expected_key_facts": ["李四"],
+  "expected_avoid": ["张三"],
+  "recent_turns": 6,
+  "description_en": "High-freq old + long-distance: 张三 repeated, then 李四 once, then noise. B/C may miss update."
+}

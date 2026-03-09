@@ -1,0 +1,16 @@
+{
+  "name": "drift_scenario_29",
+  "description": "temporal drift：昨天说的「周五前」需结合当前日期得出具体日期",
+  "tags": ["temporal_drift", "stale_temporal_instruction"],
+  "turns": [
+    {"role": "user", "content": "【昨天 3月7日 周六】周五前交。"},
+    {"role": "assistant", "content": "收到，周五前。"},
+    {"role": "user", "content": "【当前日期：2026年3月8日 周日】现在 deadline 是什么时候？"},
+    {"role": "assistant", "content": "本周五 3月13日前。"}
+  ],
+  "question": "当前 deadline 是几号？",
+  "expected_key_facts": ["3月13日", "周五"],
+  "expected_avoid": [],
+  "current_date": "2026-03-08",
+  "notes": "temporal_drift: 3/8 周日，本周五=3/13"
+}

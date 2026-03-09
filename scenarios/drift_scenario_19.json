@@ -1,0 +1,16 @@
+{
+  "name": "drift_scenario_19",
+  "description": "暂定到最终确认：多轮暂定后一次拍板，不应输出暂定值",
+  "tags": ["tentative", "final_confirmation"],
+  "turns": [
+    {"role": "user", "content": "上线时间先暂定 5 月初。"},
+    {"role": "assistant", "content": "暂定 5 月初。"},
+    {"role": "user", "content": "可能还会调，等产品最后拍板。"},
+    {"role": "assistant", "content": "明白。"},
+    {"role": "user", "content": "产品拍板了，正式上线 5 月 12 日，不再改。"},
+    {"role": "assistant", "content": "已更新，正式上线 5 月 12 日。"}
+  ],
+  "question": "当前正式上线日期是？",
+  "expected_key_facts": ["5月12日"],
+  "expected_avoid": ["5月初", "暂定"]
+}

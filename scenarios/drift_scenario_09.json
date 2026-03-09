@@ -1,0 +1,29 @@
+{
+  "name": "drift_scenario_09",
+  "description": "长距离+多实体干扰：上线/负责人/所在地各更新一次，中间约20轮无关，问三个；Baseline 易漏一个或混旧值",
+  "turns": [
+    {"role": "user", "content": "上线时间 4 月 10 日，负责人张三，我住新加坡。"},
+    {"role": "assistant", "content": "收到：4月10日上线，负责人张三，您在新加坡。"},
+    {"role": "user", "content": "今天天气不错。"},
+    {"role": "assistant", "content": "是的。"},
+    {"role": "user", "content": "需求评审什么时候？"},
+    {"role": "assistant", "content": "周三。"},
+    {"role": "user", "content": "预算表看了吗？"},
+    {"role": "assistant", "content": "看了。"},
+    {"role": "user", "content": "上线改成 4 月 20 日。"},
+    {"role": "assistant", "content": "明白，4 月 20 日。"},
+    {"role": "user", "content": "午饭吃啥？"},
+    {"role": "assistant", "content": "随便。"},
+    {"role": "user", "content": "负责人换成李四了。"},
+    {"role": "assistant", "content": "已更新，负责人李四。"},
+    {"role": "user", "content": "文档再改一版。"},
+    {"role": "assistant", "content": "好的。"},
+    {"role": "user", "content": "我搬到东京了，现在住东京。"},
+    {"role": "assistant", "content": "已更新，您住东京。"}
+  ],
+  "question": "当前上线时间、负责人、用户所在地分别是什么？请简短列出三点。",
+  "expected_key_facts": ["4月20日", "李四", "东京"],
+  "expected_avoid": ["4月10日", "张三", "新加坡"],
+  "recent_turns": 6,
+  "description_en": "Long-distance + multi-entity: 3 entities updated at different turns, ~10 irrelevant in between."
+}

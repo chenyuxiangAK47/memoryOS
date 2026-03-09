@@ -1,0 +1,20 @@
+{
+  "name": "drift_scenario_01",
+  "description": "多轮状态变化：上线时间多次修改，最后问当前计划（已写直白「先上线 beta 版，正式版 4 月 20 日」）",
+  "turns": [
+    {"role": "user", "content": "项目上线时间是 4 月 10 日。"},
+    {"role": "assistant", "content": "好的，已记录：项目上线时间 4 月 10 日。"},
+    {"role": "user", "content": "负责人是张三。"},
+    {"role": "assistant", "content": "收到，负责人张三。"},
+    {"role": "user", "content": "上线时间改成 4 月 20 日了。"},
+    {"role": "assistant", "content": "明白，已更新为 4 月 20 日上线。"},
+    {"role": "user", "content": "其实要先上线 beta 版，正式版再定。"},
+    {"role": "assistant", "content": "好的，先上线 beta 版，正式版时间待定。"},
+    {"role": "user", "content": "正式版就定 4 月 20 日吧。所以当前计划是：先上线 beta 版，正式版 4 月 20 日。"},
+    {"role": "assistant", "content": "已记录：先上线 beta 版，正式版 4 月 20 日。"}
+  ],
+  "question": "现在的上线计划是什么？请只回答当前结论（需包含先 beta 再正式 4 月 20 日）。",
+  "expected_key_facts": ["beta", "4月20日", "正式"],
+  "expected_avoid": ["4月10日"],
+  "description_en": "State changes: launch 4/10 -> 4/20 -> beta first, then formal 4/20. Explicit final line."
+}

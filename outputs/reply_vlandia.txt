@@ -1,0 +1,37 @@
+回答核心结论
+你的理解是对的：只在 OnSessionLaunched 里做 ApplyPresetOrigin()，很容易出现“钱和兵改了，但出生点好像没生效”的观感。
+建议按你写的职责拆分：
+OnCharacterCreationIsOver：负责“确定主角最终出身”，在这里调用 ApplyPresetOrigin()（设定势力/城镇/坐标等）。
+OnSessionLaunched：只做菜单注册、行为初始化等，不再做出身相关的 Apply。
+具体落地方式（示意）
+在你的 SubModule 或行为中实现/重写：
+public override void OnCharacterCreationIsOver()
+{
+    base.OnCharacterCreationIsOver();
+    // 这里根据当前待定位置 vlandia 应用预设出身
+    ApplyPresetOrigin();
+}
+OnSessionLaunched 中保留：
+public override void OnSessionLaunched(CampaignGameStarter campaignGameStarter)
+{
+    base.OnSessionLaunched(campaignGameStarter);
+    // 这里只做菜单和行为初始化
+    AddGameMenus(campaignGameStarter);
+    InitBehaviors();
+    // 不再在这里调用 ApplyPresetOrigin();
+}
+ApplyPresetOrigin() 内部要确保真正改“出生点”而不仅仅是钱和兵，例如（逻辑示意）：
+private void ApplyPresetOrigin()
+{
+    Hero mainHero = Hero.MainHero;
+    // 势力/文化/王国设置（例如 vlandia）
+    mainHero.Culture = DefaultCultures.Instance.Vlandia;
+    // mainHero.Clan / mainHero.MapFaction 等按你预设来
+    // 出生城镇或村庄
+    Settlement spawnSettlement = Settlement.Find("town_Vlandia_1"); // 示例 ID
+    MobileParty.MainParty.Position2D = spawnSettlement.GatePosition; // 或者特定坐标
+    MobileParty.MainParty.SetMoveModeHold();
+}
+小结
+保持当前“待定位置为 vlandia”的有效状态不变，只是把“真·出生点逻辑”提前到 OnCharacterCreationIsOver，并且确保 ApplyPresetOrigin() 里确实修改了 Settlement/Position，这样进入战役时就会直接出现在 vlandia，而不再只是“加钱加兵，看起来像没生效”。
+如果你愿意贴出当前 ApplyPresetOrigin 和两个 override 的代码，我可以按你的实际代码帮你精确改一版

@@ -1,0 +1,18 @@
+{
+  "name": "drift_scenario_03",
+  "description": "噪声污染：旧状态出现多次，最新状态只出现一次，Baseline 易被频次带偏",
+  "turns": [
+    {"role": "user", "content": "项目上线时间定在 4 月 10 日。"},
+    {"role": "assistant", "content": "好的，4 月 10 日上线。"},
+    {"role": "user", "content": "别忘了是 4 月 10 日。"},
+    {"role": "assistant", "content": "明白，4 月 10 日。"},
+    {"role": "user", "content": "大家确认一下，4 月 10 日没问题吧？"},
+    {"role": "assistant", "content": "确认，4 月 10 日。"},
+    {"role": "user", "content": "刚收到通知，上线改成 4 月 20 日了。"},
+    {"role": "assistant", "content": "收到，已更新为 4 月 20 日。"}
+  ],
+  "question": "当前项目上线时间是哪一天？请只回答日期。",
+  "expected_key_facts": ["4月20日"],
+  "expected_avoid": ["4月10日"],
+  "description_en": "Noise pollution: 4/10 repeated 4x, 4/20 once. Baseline may drift to 4/10."
+}

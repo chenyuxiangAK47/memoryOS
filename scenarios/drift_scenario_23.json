@@ -1,0 +1,18 @@
+{
+  "name": "drift_scenario_23",
+  "description": "噪声污染：旧日期被反复提及，新日期只出现一次",
+  "tags": ["noise_pollution"],
+  "turns": [
+    {"role": "user", "content": "截止日期 3 月 15 日。"},
+    {"role": "assistant", "content": "收到，3 月 15 日。"},
+    {"role": "user", "content": "记得是 3 月 15 日交。"},
+    {"role": "assistant", "content": "好的，3 月 15 日。"},
+    {"role": "user", "content": "邮件里也写清楚 3 月 15 日。"},
+    {"role": "assistant", "content": "明白。"},
+    {"role": "user", "content": "延期了，最终截止改成 3 月 22 日。"},
+    {"role": "assistant", "content": "已更新为 3 月 22 日。"}
+  ],
+  "question": "当前截止日期是？",
+  "expected_key_facts": ["3月22日"],
+  "expected_avoid": ["3月15日"]
+}

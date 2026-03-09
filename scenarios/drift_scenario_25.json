@@ -1,0 +1,16 @@
+{
+  "name": "drift_scenario_25",
+  "description": "冲突后解决：先出现矛盾表述，随后明确以一方为准",
+  "tags": ["resolved_conflict"],
+  "turns": [
+    {"role": "user", "content": "接口用 v1 版本。"},
+    {"role": "assistant", "content": "收到，v1。"},
+    {"role": "user", "content": "不对，已经切 v2 了。"},
+    {"role": "assistant", "content": "存在分歧：v1 或 v2。"},
+    {"role": "user", "content": "刚和架构确认了，统一用 v2，v1 废弃。"},
+    {"role": "assistant", "content": "明白，当前接口版本 v2。"}
+  ],
+  "question": "当前接口版本是？若有冲突请说明。",
+  "expected_key_facts": ["v2"],
+  "expected_avoid": ["v1", "冲突"]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "drift_scenario_XX",
+  "description": "一句话说明为何 Baseline 容易飘、Guard 应更稳",
+  "turns": [
+    {"role": "user", "content": "用户第一句"},
+    {"role": "assistant", "content": "助手回复"},
+    {"role": "user", "content": "用户第二句"},
+    {"role": "assistant", "content": "助手回复"}
+  ],
+  "question": "当前 XXX 是什么？请只回答结论。",
+  "expected_key_facts": ["关键词1", "关键词2"],
+  "expected_avoid": ["旧状态不要出现"],
+  "recent_turns": 6,
+  "description_en": "Optional."
+}

@@ -1,0 +1,14 @@
+{
+  "name": "drift_scenario_28",
+  "description": "temporal drift：明天/后天的相对时间需锚定到绝对日期",
+  "tags": ["temporal_drift", "relative_time"],
+  "turns": [
+    {"role": "user", "content": "【当前日期：2026年3月8日 周日】明天别推代码，后天再合并。"},
+    {"role": "assistant", "content": "收到，3月10日再合并。"}
+  ],
+  "question": "哪天可以 merge 代码？请给出具体日期。",
+  "expected_key_facts": ["3月10日"],
+  "expected_avoid": ["3月9日", "明天"],
+  "current_date": "2026-03-08",
+  "notes": "temporal_drift: 明天=3/9 别推，后天=3/10 可 merge"
+}

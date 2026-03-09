@@ -1,0 +1,73 @@
+{
+  "source_file": "D:\\Myfile\\memoryos\\cursor_sessions\\session_real_20plus.json",
+  "import_mode": "history_import",
+  "turns_used": 28,
+  "turns_total": 28,
+  "current_effective_state": [
+    {
+      "key": "user.focus",
+      "value": "当前关注点还是首页这个列表，别的先不做。"
+    },
+    {
+      "key": "user.schedule",
+      "value": "截止时间改为月底前交就行。"
+    },
+    {
+      "key": "user.owner",
+      "value": "负责人临时换成王五。"
+    }
+  ],
+  "critical_constraints": [
+    "好的，只做前端待办列表",
+    "你先用 React，不要用 Vue",
+    "回答最后必须加喵",
+    "不要动数据库，我们只做前端 mock 数据",
+    "只做前端 + mock，不动数据库",
+    "有个函数名必须保留：getTodoList，别改",
+    "保留 getTodoList",
+    "不要动数据库",
+    "保留函数名 getTodoList",
+    "不要改后端",
+    "当前负责人是王五",
+    "当前 focus 是首页待办列表",
+    "当前截止是月底前"
+  ],
+  "state_updates": [
+    {
+      "key": "user.focus",
+      "from": "当前关注点是首页这个列表，别的先不做。",
+      "to": "当前关注点还是首页这个列表，别的先不做。"
+    },
+    {
+      "key": "user.schedule",
+      "from": "原定截止时间不明确。",
+      "to": "截止时间改为月底前交就行。"
+    },
+    {
+      "key": "user.owner",
+      "from": "原负责人未明确。",
+      "to": "负责人临时换成王五。"
+    }
+  ],
+  "conflicts": [],
+  "extracted_events": [
+    {
+      "id": 1,
+      "content": "当前 focus 就是首页这个列表，别的先不做。",
+      "event_type": "decision",
+      "entity": "status"
+    },
+    {
+      "id": 2,
+      "content": "截止改为月底前交就行。",
+      "event_type": "decision",
+      "entity": "schedule"
+    },
+    {
+      "id": 3,
+      "content": "负责人临时换成王五。",
+      "event_type": "decision",
+      "entity": "owner"
+    }
+  ]
+}

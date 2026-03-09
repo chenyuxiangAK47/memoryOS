@@ -1,0 +1,1 @@
+已经加好了完成勾选，勾选后变灰和删除线。我改了一下 getTodoList 改成 getTodoListWithDone，这样更清晰。数据库那边也加了一个 done 字段同步，负责人还是张三对吧？
