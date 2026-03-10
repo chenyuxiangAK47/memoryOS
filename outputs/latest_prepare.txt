@@ -1,0 +1,56 @@
+============================================================
+Memory Guard — prepare（导入状态）
+============================================================
+
+--- Current effective state ---
+- [user.focus] 当前关注点还是首页这个列表，别的先不做。
+- [user.schedule] 截止时间改为月底前交就行。
+- [user.owner] 负责人临时换成王五。
+
+--- Hard constraints ---
+好的，只做前端待办列表
+你先用 React，不要用 Vue
+回答最后必须加喵
+不要动数据库，我们只做前端 mock 数据
+只做前端 + mock，不动数据库
+有个函数名必须保留：getTodoList，别改
+不要动数据库
+不要改后端
+
+--- Soft constraints ---
+保留 getTodoList
+保留函数名 getTodoList
+当前负责人是王五
+当前 focus 是首页待办列表
+当前截止是月底前
+
+--- Enhanced prompt ---
+【当前有效状态】请务必遵守以下状态与约束。
+
+Current effective state:
+- [user.focus] 当前关注点还是首页这个列表，别的先不做。
+- [user.schedule] 截止时间改为月底前交就行。
+- [user.owner] 负责人临时换成王五。
+
+Hard constraints:
+好的，只做前端待办列表
+你先用 React，不要用 Vue
+回答最后必须加喵
+不要动数据库，我们只做前端 mock 数据
+只做前端 + mock，不动数据库
+有个函数名必须保留：getTodoList，别改
+不要动数据库
+不要改后端
+
+Soft constraints:
+保留 getTodoList
+保留函数名 getTodoList
+当前负责人是王五
+当前 focus 是首页待办列表
+当前截止是月底前
+
+---
+（请在此输入当前请求，或粘贴后续问题）
+
+请根据上述「当前有效状态」和「Hard constraints / Soft constraints」回答，尤其不要违反 Hard constraints。
+============================================================

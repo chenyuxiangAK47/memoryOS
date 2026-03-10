@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    // Stage 2 Hook MVP 已完成、自测通过，但当前 Cursor 版本在 afterAgentResponse 上未稳定提供 stdin payload。
+    // 为避免干扰日常使用，这里暂时关闭所有 hooks，保留脚本和配置文件作为后续 Stage 2.5 / Stage 3 的集成入口。
+    //
+    // 如需重新开启，只需恢复：
+    // "beforeSubmitPrompt": [{ "command": "py -3 .cursor/hooks/pre_memoryguard.py" }],
+    // "afterAgentResponse": [{ "command": "py -3 .cursor/hooks/post_memoryguard.py" }]
+    }
+}
+

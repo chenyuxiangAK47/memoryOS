@@ -1,0 +1,17 @@
+============================================================
+Memory Guard — output drift check
+============================================================
+{
+  "sentinel_retained": false,
+  "missing_surface_sentinel": true,
+  "semantic_constraint_violations": [],
+  "semantic_constraint_warnings": [
+    "required function getTodoList not mentioned",
+    "required function getTodoList not mentioned",
+    "required function getTodoList not mentioned"
+  ],
+  "stale_state_references": [],
+  "format_violation": false,
+  "final_status": "possible_memory_drift"
+}
+============================================================

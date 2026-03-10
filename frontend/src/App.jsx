@@ -1,27 +1,36 @@
-import { useState, useMemo } from 'react';
-import { getTodoList } from './getTodoList';
+import { useEffect, useState } from 'react';
+import { getTodoListV2, saveTodoList } from './getTodoList';
 import './App.css';
 
 function App() {
-  const list = useMemo(() => getTodoList(), []);
-  const [completedIds, setCompletedIds] = useState(new Set());
+  const [list, setList] = useState([]);
+
+  useEffect(() => {
+    getTodoListV2().then((data) => {
+      setList(data);
+    });
+  }, []);
 
   const toggle = (id) => {
-    setCompletedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+    setList((prev) => {
+      const next = prev.map((item) =>
+        item.id === id ? { ...item, completed: !item.completed } : item,
+      );
+      saveTodoList(next);
       return next;
     });
   };
 
+  const owner = list[0]?.owner ?? '张三';
+  const deadline = list[0]?.due ?? '月底前';
+
   return (
     <div className="app">
       <h1>首页待办列表</h1>
-      <p className="meta">负责人：王五 · 截止：月底前</p>
+      <p className="meta">负责人：{owner} · 截止：{deadline}</p>
       <ul className="todo-list">
         {list.map((item) => {
-          const done = completedIds.has(item.id);
+          const done = item.completed;
           return (
             <li key={item.id} className={done ? 'todo-item done' : 'todo-item'}>
               <label>

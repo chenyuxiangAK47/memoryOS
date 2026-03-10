@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parent
 
 # --all 时同时跑的 scenario 数，避免 API 限流
 MAX_SCENARIO_WORKERS = 3
+# 我是测试
 
 
 def turns_to_text(turns: list[dict]) -> str:
@@ -36,6 +37,8 @@ def turns_to_text(turns: list[dict]) -> str:
         speaker = "用户" if role == "user" else "助手"
         lines.append(f"Round {i} {speaker}：{content}")
     return "\n".join(lines)
+
+# 我是测试
 
 
 def run_baseline(
@@ -186,7 +189,7 @@ def run_scenario(scenario_path: Path, client: OpenAI) -> dict:
 
     conversation_text = turns_to_text(turns)
 
-    with ThreadPoolExecutor(max_workers=4) as executor:
+    with ThreadPoolExecutor(max_workers=4) as executor:  # 我是测试
         fa = executor.submit(run_baseline, conversation_text, question, client)
         fb = executor.submit(run_baseline_recent, turns, question, recent_turns, client)
         fc = executor.submit(run_baseline_summary, conversation_text, question, client)

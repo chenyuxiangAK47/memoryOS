@@ -1,0 +1,40 @@
+回答
+结论：目前“只在 OnSessionLaunched 里调用 ApplyPresetOrigin()”确实会导致“钱/兵变了，但出生点好像没生效”的观感；应按职责拆分生命周期，把“确定最终出生点”的逻辑前移。
+
+建议的调整方式
+OnCharacterCreationIsOver：负责最终出身落位
+
+在你的 SubModule 或行为里重写：
+public override void OnCharacterCreationIsOver()
+{
+    base.OnCharacterCreationIsOver();
+    // 这里真正应用预设出身（势力/城镇/坐标）
+    ApplyPresetOrigin();
+}
+OnSessionLaunched：只做菜单和行为初始化
+
+public override void OnSessionLaunched(CampaignGameStarter campaignGameStarter)
+{
+    base.OnSessionLaunched(campaignGameStarter);
+    AddGameMenus(campaignGameStarter);
+    InitBehaviors();
+    // 这里不要再调用 ApplyPresetOrigin();
+}
+ApplyPresetOrigin() 内部要“真改出生点”而不是只改钱/兵（示意）：
+
+private void ApplyPresetOrigin()
+{
+    Hero mainHero = Hero.MainHero;
+    // 势力 / 文化（例如 vlandia）
+    mainHero.Culture = DefaultCultures.Instance.Vlandia;
+    // 按你预设设置 Clan / MapFaction 等
+    // ...
+    // 出生城镇或村庄
+    Settlement spawnSettlement = Settlement.Find("town_Vlandia_1"); // 示例 ID
+    MobileParty.MainParty.Position2D = spawnSettlement.GatePosition;
+    MobileParty.MainParty.SetMoveModeHold();
+}
+这样在角色创建结束时就已经把“vlandia 出生点”真正应用进 Settlement / Position，进入战役时会直接刷在 vlandia，而不再只是看到“加钱加兵，好像没生效”。
+
+如果你把现在的 ApplyPresetOrigin 以及这两个生命周期 override 的实际代码贴出来，我可以根据你的项目结构给出一版可直接替换的精确实现。
+
