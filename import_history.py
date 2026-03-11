@@ -63,10 +63,10 @@ def load_history_file(path: Path) -> tuple[list[dict], str]:
 
 def parse_dialogue_to_turns(text: str) -> list[dict]:
     """
-    从纯文本解析出 turns。
+    从纯文本解析出 turns。平台无关，支持 Cursor / Gemini / ChatGPT 等导出的对话格式。
     支持：
     - 行内：用户：/ 助手：、User:/ Assistant:、Round N 用户：/ Round N 助手：
-    - 块格式：**User** / **Cursor** 单独成行，内容直到下一个 **User**/**Cursor**
+    - 块格式：**User** / **Cursor** / **Assistant** / **Gemini** 等单独成行，内容直到下一个块头
     """
     lines = text.strip().split("\n")
     turns: list[dict] = []
@@ -77,8 +77,11 @@ def parse_dialogue_to_turns(text: str) -> list[dict]:
         if current_role and current_content:
             turns.append({"role": current_role, "content": "\n".join(current_content).strip()})
 
-    # 块格式：行内仅 \*\*(User|Cursor)\*\*
-    block_header = re.compile(r"^\s*\*\*(User|Cursor)\*\*\s*$", re.IGNORECASE)
+    # 块格式：User/Cursor → user；Assistant/Gemini/助手 等 → assistant（不绑定 Cursor）
+    block_header = re.compile(
+        r"^\s*\*\*(User|Cursor|Assistant|Gemini|ChatGPT|Claude|助手)\*\*\s*$",
+        re.IGNORECASE,
+    )
 
     # 先尝试块格式（若文本里出现过 **User** 或 **Cursor** 且行内模式几乎没匹配到）
     line_pattern = re.compile(
@@ -99,7 +102,8 @@ def parse_dialogue_to_turns(text: str) -> list[dict]:
                 if bl:
                     flush()
                     role_label = (bl.group(1) or "").strip().lower()
-                    current_role = "user" if role_label == "user" else "assistant"
+                    # User / Cursor → user；其余（Assistant / Gemini / 助手 等）→ assistant
+                    current_role = "user" if role_label in ("user", "cursor") else "assistant"
                     current_content = []
                 else:
                     if current_role is not None:

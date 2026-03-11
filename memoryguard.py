@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 #!/usr/bin/env python3
 """
 Memory Guard CLI — 防 AI 记忆偏移 / Memory drift detection for long-running AI sessions.
@@ -10,12 +12,12 @@ Memory Guard CLI — 防 AI 记忆偏移 / Memory drift detection for long-runni
   import_history <file> [--out path] [--summary path]  从旧聊天导入状态
   analyze <file>             分析会议/聊天记录（事件+冲突检测+总结）
 """
-from __future__ import annotations
-
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
+from typing import List
 
 from dotenv import load_dotenv
 
@@ -141,6 +143,43 @@ def _imported_state_to_sentinels(data: dict) -> dict:
         else:
             semantic.append(c)
     return {"surface": surface, "semantic": semantic, "state": []}
+
+
+def get_changed_files() -> List[str]:
+    """
+    Return a list of changed files from `git diff --name-only`.
+    """
+    result = subprocess.run(
+        ["git", "diff", "--name-only"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    if result.returncode != 0:
+        # 在这个 MVP 版本里，git 出错就当作“没有改动”
+        return []
+
+    lines = result.stdout.splitlines()
+    return [line.strip() for line in lines if line.strip()]
+
+
+def cmd_guard_diff() -> int:
+    """
+    Minimal 3B diff guard command:
+    - Collect changed files from git
+    - Print a small JSON blob
+    """
+    changed_files = get_changed_files()
+
+    payload = {
+        "changed_files": changed_files,
+        "final_status": "ok",
+    }
+
+    json.dump(payload, sys.stdout, ensure_ascii=False, indent=2)
+    sys.stdout.write("\n")
+    return 0
 
 
 def _split_constraints_hard_soft(constraints: list[str]) -> tuple[list[str], list[str]]:
@@ -396,6 +435,8 @@ def main() -> int:
     imp_p.add_argument("--chunk-size", type=int, default=2000, metavar="N", dest="chunk_size", help="分块行数，默认 2000（仅 --chunked 时有效）")
     imp_p.add_argument("--no-llm", action="store_true", dest="no_llm", help="分块时仅规则抽取，不调 LLM（仅 --chunked 时有效）")
     imp_p.add_argument("--event-log", default=None, dest="event_log", help="event_log 输出路径，默认 outputs/event_log.json")
+    diff_p = sub.add_parser("guard-diff", help="列出当前 git diff 的改动文件（MVP diff guard）")
+    gui_p = sub.add_parser("gui", help="打开 MemoryGuard Desktop 图形界面（不依赖 Cursor/Gemini）")
     args = parser.parse_args()
     if args.command == "analyze":
         return cmd_analyze(args.file)
@@ -420,6 +461,16 @@ def main() -> int:
             use_llm=not getattr(args, "no_llm", False),
             event_log_path=getattr(args, "event_log", None),
         )
+    if args.command == "guard-diff":
+        return cmd_guard_diff()
+    if args.command == "gui":
+        try:
+            from memoryguard_gui import main as gui_main
+            gui_main()
+            return 0
+        except ImportError as e:
+            print(f"启动 GUI 失败: {e}", file=sys.stderr)
+            return 1
     if args.command == "benchmark":
         bench_args = ["--all"] if getattr(args, "bench_all", False) else []
         if not bench_args and args.scenario:
