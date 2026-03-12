@@ -145,6 +145,37 @@ def _imported_state_to_sentinels(data: dict) -> dict:
     return {"surface": surface, "semantic": semantic, "state": []}
 
 
+def run_check_from_text(state_path: str, reply_text: str) -> dict:
+    """
+    基于给定的 state JSON 路径和单条回答文本，运行一次 drift 检查并返回原始报告字典。
+    该函数复用现有 check 逻辑，不做任何新的 drift 规则判断。
+    """
+    session_path = Path(state_path)
+    if not session_path.is_absolute():
+        session_path = (ROOT / session_path).resolve()
+    if not session_path.exists():
+        raise FileNotFoundError(f"Session 不存在: {session_path}")
+
+    session = json.loads(session_path.read_text(encoding="utf-8"))
+    # 兼容导入状态文件
+    if session.get("import_mode") == "history_import":
+        if check_output_drift is None:
+            raise RuntimeError("cursor_guard_experiment 未可用")
+        state_summary = _format_imported_state_summary(session)
+        sentinels = _imported_state_to_sentinels(session)
+        return check_output_drift(reply_text, sentinels, state_summary)
+
+    if run_experiment is None or check_output_drift is None:
+        raise RuntimeError("cursor_guard_experiment 未可用")
+
+    result = run_experiment(session_path, mode="guard")
+    return check_output_drift(
+        reply_text,
+        session.get("sentinels") or {},
+        result["current_state_summary"],
+    )
+
+
 def get_changed_files() -> List[str]:
     """
     Return a list of changed files from `git diff --name-only`.
@@ -300,37 +331,164 @@ def cmd_check(output_path: str, session_path: str | None) -> int:
     if not session_path_resolved.exists():
         print(f"Session 不存在: {session_path_resolved}", file=sys.stderr)
         return 1
-    session = json.loads(session_path_resolved.read_text(encoding="utf-8"))
-    # 兼容导入状态文件
-    if session.get("import_mode") == "history_import":
-        if check_output_drift is None:
-            print("cursor_guard_experiment 未可用", file=sys.stderr)
-            return 1
-        state_summary = _format_imported_state_summary(session)
-        sentinels = _imported_state_to_sentinels(session)
-        output_text = out_path.read_text(encoding="utf-8")
-        report = check_output_drift(output_text, sentinels, state_summary)
-        print("=" * 60)
-        print("Memory Guard — output drift check")
-        print("=" * 60)
-        print(json.dumps(report, ensure_ascii=False, indent=2))
-        print("=" * 60)
-        return 0
-    if run_experiment is None or check_output_drift is None:
-        print("cursor_guard_experiment 未可用", file=sys.stderr)
-        return 1
-    result = run_experiment(session_path_resolved, mode="guard")
     output_text = out_path.read_text(encoding="utf-8")
-    report = check_output_drift(
-        output_text,
-        session.get("sentinels") or {},
-        result["current_state_summary"],
-    )
+    try:
+        report = run_check_from_text(str(session_path_resolved), output_text)
+    except Exception as e:
+        print(f"check 失败: {e}", file=sys.stderr)
+        return 1
     print("=" * 60)
     print("Memory Guard — output drift check")
     print("=" * 60)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     print("=" * 60)
+    return 0
+
+
+def _collect_violations(report: dict) -> list[str]:
+    """
+    从单次 check 报告中提取统一的 violations 列表：
+    - semantic_constraint_violations
+    - stale_state_references
+    - surface/sentinel 相关（missing_surface_sentinel）
+    - 格式违规（format_violation）
+    - 语义 warnings（作为较轻级别标记）
+    """
+    violations: list[str] = []
+    violations.extend(report.get("semantic_constraint_violations") or [])
+    violations.extend(report.get("stale_state_references") or [])
+    if report.get("missing_surface_sentinel"):
+        violations.append("missing_surface_sentinel")
+    if report.get("format_violation"):
+        violations.append("format_violation")
+    violations.extend(report.get("semantic_constraint_warnings") or [])
+    return violations
+
+
+def _read_reply_text(path: Path) -> str:
+    """
+    读取回复文件内容，优先按 UTF-8，其次尝试常见编码，避免因为编码问题导致整个 trace-drift 失败。
+    仅用于 trace-drift 场景，不影响其他命令。
+    """
+    for enc in ("utf-8", "utf-8-sig", "utf-16", "gbk"):
+        try:
+            return path.read_text(encoding=enc)
+        except UnicodeDecodeError:
+            continue
+    # 兜底：按二进制读取再解码为 utf-8，非法字节忽略
+    return path.read_bytes().decode("utf-8", errors="ignore")
+
+
+def cmd_trace_drift(state_path: str, replies_dir: str, out_path: str) -> int:
+    """
+    批量对多轮回答运行 drift check，生成 trace_drift.json + trace_drift.md：
+    - timeline：每一轮的 final_status + violations
+    - summary：首次 drift 出现的位置及状态
+    """
+    state = Path(state_path)
+    if not state.is_absolute():
+        state = (ROOT / state).resolve()
+    if not state.exists():
+        print(f"状态文件不存在: {state}", file=sys.stderr)
+        return 1
+
+    replies_root = Path(replies_dir)
+    if not replies_root.is_absolute():
+        replies_root = (ROOT / replies_root).resolve()
+    if not replies_root.exists() or not replies_root.is_dir():
+        print(f"回复目录不存在或不是目录: {replies_root}", file=sys.stderr)
+        return 1
+
+    out_json_path = Path(out_path)
+    if not out_json_path.is_absolute():
+        out_json_path = (ROOT / out_json_path).resolve()
+
+    reply_files = sorted(
+        [p for p in replies_root.glob("*.txt") if p.is_file()],
+        key=lambda p: p.name,
+    )
+    if not reply_files:
+        print(f"回复目录中未找到任何 .txt 文件: {replies_root}", file=sys.stderr)
+        return 1
+
+    timeline: list[dict] = []
+    first_drift_reply: str | None = None
+    first_drift_turn_index: int | None = None
+    first_drift_status: str | None = None
+
+    for idx, rp in enumerate(reply_files, start=1):
+        reply_text = _read_reply_text(rp)
+        try:
+            report = run_check_from_text(str(state), reply_text)
+        except Exception as e:
+            print(f"trace-drift: 第 {idx} 轮（{rp.name}）检查失败: {e}", file=sys.stderr)
+            return 1
+
+        final_status = report.get("final_status", "unknown")
+        violations = _collect_violations(report)
+
+        timeline.append(
+            {
+                "turn_index": idx,
+                "reply_file": rp.name,
+                "final_status": final_status,
+                "violations": violations,
+            }
+        )
+
+        if final_status != "ok" and first_drift_reply is None:
+            first_drift_reply = rp.name
+            first_drift_turn_index = idx
+            first_drift_status = final_status
+
+    summary = {
+        "total_replies": len(reply_files),
+        "first_drift_reply": first_drift_reply,
+        "first_drift_turn_index": first_drift_turn_index,
+        "first_drift_status": first_drift_status,
+    }
+
+    out_json = {
+        "summary": summary,
+        "timeline": timeline,
+    }
+
+    ensure_outputs_dir()
+    out_json_path.write_text(json.dumps(out_json, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    # Markdown 报告路径：与 JSON 同名不同后缀
+    out_md_path = out_json_path.with_suffix(".md")
+    lines: list[str] = []
+    lines.append("# Trace Drift Report")
+    lines.append("")
+    lines.append("## Summary")
+    lines.append(f"- Total replies: {summary['total_replies']}")
+    if first_drift_reply is None:
+        lines.append("- First drift reply: none")
+        lines.append("- First drift turn index: none")
+        lines.append("- First drift status: ok")
+    else:
+        lines.append(f"- First drift reply: {first_drift_reply}")
+        lines.append(f"- First drift turn index: {first_drift_turn_index}")
+        lines.append(f"- First drift status: {first_drift_status}")
+    lines.append("")
+    lines.append("## Timeline")
+    lines.append("")
+    for item in timeline:
+        lines.append(f"### Turn {item['turn_index']} — {item['reply_file']}")
+        lines.append(f"- Status: {item['final_status']}")
+        if item["violations"]:
+            lines.append("- Violations:")
+            for v in item["violations"]:
+                lines.append(f"  - {v}")
+        else:
+            lines.append("- Violations: none")
+        lines.append("")
+
+    out_md_path.write_text("\n".join(lines), encoding="utf-8")
+
+    print(f"Trace drift JSON saved to: {out_json_path}")
+    print(f"Trace drift Markdown saved to: {out_md_path}")
     return 0
 
 
@@ -437,6 +595,10 @@ def main() -> int:
     imp_p.add_argument("--event-log", default=None, dest="event_log", help="event_log 输出路径，默认 outputs/event_log.json")
     diff_p = sub.add_parser("guard-diff", help="列出当前 git diff 的改动文件（MVP diff guard）")
     gui_p = sub.add_parser("gui", help="打开 MemoryGuard Desktop 图形界面（不依赖 Cursor/Gemini）")
+    trace_p = sub.add_parser("trace-drift", help="批量对多轮回答做 drift 检查并追踪首次偏移")
+    trace_p.add_argument("--state", required=True, help="import_history 生成的 imported_state.json 路径")
+    trace_p.add_argument("--replies", required=True, help="包含多轮回答 txt 文件的目录")
+    trace_p.add_argument("--out", required=True, help="trace_drift.json 输出路径")
     args = parser.parse_args()
     if args.command == "analyze":
         return cmd_analyze(args.file)
@@ -476,6 +638,8 @@ def main() -> int:
         if not bench_args and args.scenario:
             bench_args = [args.scenario]
         return cmd_benchmark(bench_args)
+    if args.command == "trace-drift":
+        return cmd_trace_drift(args.state, args.replies, args.out)
     return 0
 
 

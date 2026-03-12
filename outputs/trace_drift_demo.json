@@ -1,0 +1,40 @@
+{
+  "summary": {
+    "total_replies": 4,
+    "first_drift_reply": "reply_3.txt",
+    "first_drift_turn_index": 3,
+    "first_drift_status": "possible_memory_drift"
+  },
+  "timeline": [
+    {
+      "turn_index": 1,
+      "reply_file": "reply_1.txt",
+      "final_status": "ok",
+      "violations": []
+    },
+    {
+      "turn_index": 2,
+      "reply_file": "reply_2.txt",
+      "final_status": "ok",
+      "violations": []
+    },
+    {
+      "turn_index": 3,
+      "reply_file": "reply_3.txt",
+      "final_status": "possible_memory_drift",
+      "violations": [
+        "modified_database_layer",
+        "backend mentioned; consider clarifying if negated"
+      ]
+    },
+    {
+      "turn_index": 4,
+      "reply_file": "reply_4.txt",
+      "final_status": "possible_memory_drift",
+      "violations": [
+        "modified_backend",
+        "database mentioned; consider clarifying if negated"
+      ]
+    }
+  ]
+}

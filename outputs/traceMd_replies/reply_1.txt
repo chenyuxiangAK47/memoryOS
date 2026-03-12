@@ -1,0 +1,57 @@
+# Solution for Todo List Performance (1000+ items)
+To improve load speed without modifying backend/database, I recommend **client-side virtualization** (only render visible items) and **request caching**:
+
+## Step 1: Use react-window for virtualized list rendering
+Install dependency (frontend-only):
+npm install react-window
+
+## Step 2: Optimized frontend code (React)
+import { FixedSizeList } from 'react-window';
+import { useMemo, useEffect, useState } from 'react';
+
+// Keep getTodoList function name unchanged (per constraint)
+const getTodoList = async () => {
+  const res = await fetch('/api/todos'); // No backend changes
+  return res.json();
+};
+
+const TodoList = () => {
+  const [todos, setTodos] = useState([]);
+  
+  // Cache getTodoList result to avoid repeated requests
+  const cachedTodos = useMemo(() => getTodoList(), []);
+
+  useEffect(() => {
+    cachedTodos.then(data => setTodos(data));
+  }, [cachedTodos]);
+
+  // Render only visible items (50px per item)
+  const renderTodoItem = ({ index, style }) => (
+    <div style={style} className="todo-item">
+      {todos[index].id}: {todos[index].title}
+    </div>
+  );
+
+  return (
+    <div className="todo-list-container">
+      <h2>Todo List (Optimized)</h2>
+      <FixedSizeList
+        height={500} // Viewport height
+        width="100%"
+        itemCount={todos.length}
+        itemSize={50} // Height per todo item
+      >
+        {renderTodoItem}
+      </FixedSizeList>
+    </div>
+  );
+};
+
+export default TodoList;
+
+### Key Compliance Check
+✓ No database schema changes
+✓ No backend API/business logic changes
+✓ Only frontend modifications
+✓ getTodoList name unchanged
+✓ No database write logic
