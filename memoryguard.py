@@ -27,8 +27,12 @@ from memory_guard import (
     format_finding_card,
     get_current_effective_state,
 )
+from report_explainer import explain_check_result, explain_trace_drift
 from summarizer import summarize
 from utils import OUTPUTS_DIR, ensure_outputs_dir, get_word_count, read_file, split_text
+from guard_chat import guard_chat
+from mock_wrapper import MockWrapper
+from runtime.wrappers.openai_wrapper import OpenAIWrapper
 
 # Cursor Guard 实验相关（prepare / check / run）
 try:
@@ -47,6 +51,23 @@ except ImportError:
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
 ROOT = Path(__file__).resolve().parent
+
+
+def _safe_print(text: str) -> None:
+    """
+    在可能是 GBK 等有限编码的终端下安全打印文本：
+    - 首选直接 print；
+    - 若遇到 UnicodeEncodeError（例如 emoji），则降级为忽略无法编码的字符再打印。
+    """
+    try:
+        print(text)
+    except UnicodeEncodeError:
+        enc = sys.stdout.encoding or "utf-8"
+        try:
+            safe = text.encode(enc, errors="ignore").decode(enc, errors="ignore")
+        except Exception:
+            safe = text.encode("utf-8", errors="ignore").decode("utf-8", errors="ignore")
+        print(safe)
 
 
 def cmd_analyze(file_path: str) -> int:
@@ -291,33 +312,33 @@ Soft constraints:
 （请在此输入当前请求，或粘贴后续问题）
 
 请根据上述「当前有效状态」和「Hard constraints / Soft constraints」回答，尤其不要违反 Hard constraints。"""
-        print("=" * 60)
-        print("Memory Guard — prepare（导入状态）")
-        print("=" * 60)
-        print("\n--- Current effective state ---")
-        print(state_text)
-        print("\n--- Hard constraints ---")
-        print(hard_text)
-        print("\n--- Soft constraints ---")
-        print(soft_text)
-        print("\n--- Enhanced prompt ---")
-        print(enhanced)
-        print("=" * 60)
+        _safe_print("=" * 60)
+        _safe_print("Memory Guard — prepare（导入状态）")
+        _safe_print("=" * 60)
+        _safe_print("\n--- Current effective state ---")
+        _safe_print(state_text)
+        _safe_print("\n--- Hard constraints ---")
+        _safe_print(hard_text)
+        _safe_print("\n--- Soft constraints ---")
+        _safe_print(soft_text)
+        _safe_print("\n--- Enhanced prompt ---")
+        _safe_print(enhanced)
+        _safe_print("=" * 60)
         return 0
     if run_experiment is None:
         print("cursor_guard_experiment 未可用", file=sys.stderr)
         return 1
     result = run_experiment(path, mode="guard")
-    print("=" * 60)
-    print("Memory Guard — prepare（当前状态 + 约束 + 增强 prompt）")
-    print("=" * 60)
-    print("\n--- Current effective state ---")
-    print(result["current_state_summary"])
-    print("\n--- Critical constraints ---")
-    print(result["critical_constraints_summary"])
-    print("\n--- Enhanced prompt ---")
-    print(result["enhanced_prompt"])
-    print("=" * 60)
+    _safe_print("=" * 60)
+    _safe_print("Memory Guard — prepare（当前状态 + 约束 + 增强 prompt）")
+    _safe_print("=" * 60)
+    _safe_print("\n--- Current effective state ---")
+    _safe_print(result["current_state_summary"])
+    _safe_print("\n--- Critical constraints ---")
+    _safe_print(result["critical_constraints_summary"])
+    _safe_print("\n--- Enhanced prompt ---")
+    _safe_print(result["enhanced_prompt"])
+    _safe_print("=" * 60)
     return 0
 
 
@@ -337,11 +358,22 @@ def cmd_check(output_path: str, session_path: str | None) -> int:
     except Exception as e:
         print(f"check 失败: {e}", file=sys.stderr)
         return 1
-    print("=" * 60)
-    print("Memory Guard — output drift check")
-    print("=" * 60)
-    print(json.dumps(report, ensure_ascii=False, indent=2))
-    print("=" * 60)
+    _safe_print("=" * 60)
+    _safe_print("Memory Guard — output drift check")
+    _safe_print("=" * 60)
+    _safe_print(json.dumps(report, ensure_ascii=False, indent=2))
+    _safe_print("=" * 60)
+
+    # 额外写入可读解释文件（不影响原有输出）
+    try:
+        OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+        explained = explain_check_result(report)
+        explained_path = OUTPUTS_DIR / "latest_check_explained.md"
+        explained_path.write_text(explained, encoding="utf-8")
+    except Exception:
+        # 解释层失败不应影响主逻辑
+        pass
+
     return 0
 
 
@@ -487,8 +519,60 @@ def cmd_trace_drift(state_path: str, replies_dir: str, out_path: str) -> int:
 
     out_md_path.write_text("\n".join(lines), encoding="utf-8")
 
+    # 额外写入解释版 Markdown（不影响原有 JSON/MD）
+    try:
+        explained_text = explain_trace_drift(out_json)
+        explained_md_path = out_json_path.with_name(f"{out_json_path.stem}_explained.md")
+        explained_md_path.write_text(explained_text, encoding="utf-8")
+    except Exception:
+        # 解释层失败不应影响主逻辑
+        pass
+
     print(f"Trace drift JSON saved to: {out_json_path}")
     print(f"Trace drift Markdown saved to: {out_md_path}")
+    return 0
+
+
+def cmd_guard_chat(
+    state_path: str,
+    model: str,
+    scenario: str,
+    provider_model: str | None,
+    prompt: str,
+    out_path: str | None,
+) -> int:
+    """
+    v2-alpha/beta: runtime guard wrapper.
+    model=mock -> MockWrapper(scenario); model=openai -> OpenAIWrapper(provider_model).
+    Produces a result bundle: enhanced_prompt + ai_response + guard_result + readable_summary.
+    """
+    model = (model or "mock").strip().lower()
+    if model == "openai":
+        try:
+            wrapper = OpenAIWrapper(model=provider_model or "gpt-4o-mini")
+        except ValueError as e:
+            print(f"guard-chat: {e}", file=sys.stderr)
+            return 1
+    else:
+        wrapper = MockWrapper(scenario=scenario or "clean")
+    try:
+        bundle = guard_chat(model_wrapper=wrapper, state_path=state_path, user_prompt=prompt)
+    except Exception as e:
+        print(f"guard-chat 失败: {e}", file=sys.stderr)
+        return 1
+
+    ensure_outputs_dir()
+    out_json = Path(out_path) if out_path else (OUTPUTS_DIR / "live_guard_result.json")
+    if not out_json.is_absolute():
+        out_json = (ROOT / out_json).resolve()
+    out_json.write_text(json.dumps(bundle, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    out_md = out_json.with_suffix(".md")
+    out_md.write_text(bundle.get("readable_summary", ""), encoding="utf-8")
+
+    _safe_print(bundle.get("readable_summary", ""))
+    _safe_print(f"\nSaved: {out_json}")
+    _safe_print(f"Saved: {out_md}")
     return 0
 
 
@@ -599,6 +683,13 @@ def main() -> int:
     trace_p.add_argument("--state", required=True, help="import_history 生成的 imported_state.json 路径")
     trace_p.add_argument("--replies", required=True, help="包含多轮回答 txt 文件的目录")
     trace_p.add_argument("--out", required=True, help="trace_drift.json 输出路径")
+    guard_p = sub.add_parser("guard-chat", help="v2: prepare + model call + check + explain (mock or openai)")
+    guard_p.add_argument("--state", required=True, help="import_history 生成的 imported_state.json 路径")
+    guard_p.add_argument("--model", default="mock", choices=["mock", "openai"], help="mock 或 openai")
+    guard_p.add_argument("--scenario", default="clean", choices=["clean", "drift"], help="仅 mock 时有效：clean/drift")
+    guard_p.add_argument("--provider-model", default=None, dest="provider_model", help="openai 时模型名，默认 gpt-4o-mini")
+    guard_p.add_argument("--prompt", required=True, help="用户请求文本")
+    guard_p.add_argument("--out", default=None, help="输出 JSON 路径，默认 outputs/live_guard_result.json")
     args = parser.parse_args()
     if args.command == "analyze":
         return cmd_analyze(args.file)
@@ -640,6 +731,15 @@ def main() -> int:
         return cmd_benchmark(bench_args)
     if args.command == "trace-drift":
         return cmd_trace_drift(args.state, args.replies, args.out)
+    if args.command == "guard-chat":
+        return cmd_guard_chat(
+            args.state,
+            getattr(args, "model", "mock"),
+            getattr(args, "scenario", "clean"),
+            getattr(args, "provider_model", None),
+            args.prompt,
+            args.out,
+        )
     return 0
 
 

@@ -10,6 +10,8 @@ import gradio as gr
 BASE_DIR = Path(__file__).resolve().parent
 OUTPUTS = BASE_DIR / "outputs"
 
+from report_explainer import explain_check_result, explain_trace_drift
+
 
 def _run_cli(args: list[str]) -> Tuple[int, str, str]:
     """调用 memoryguard.py CLI，返回 (returncode, stdout, stderr)。"""
@@ -112,7 +114,7 @@ def check_ui(answer_text: str, imported_state_path: str):
 
     code, out, err = _run_cli(["check", str(out_txt), "--session", str(session_path)])
     if code != 0:
-        return f"check 失败。\nstdout:\n{out}\n\nstderr:\n{err}", ""
+        return f"check 失败。\nstdout:\n{out}\n\nstderr:\n{err}", "", ""
 
     report_text = out
     if "{" in out and "}" in out:
@@ -122,23 +124,24 @@ def check_ui(answer_text: str, imported_state_path: str):
             json_part = out[start:end]
             report = json.loads(json_part)
             final_status = report.get("final_status", "")
-            return json.dumps(report, ensure_ascii=False, indent=2), final_status
+            readable = explain_check_result(report)
+            return json.dumps(report, ensure_ascii=False, indent=2), final_status, readable
         except Exception:
-            pass
-    return report_text, ""
+            return report_text, "", ""
+    return report_text, "", ""
 
 
 def trace_drift_ui(state_path: str, replies_dir: str):
-    """基于 state JSON + replies 目录运行 trace-drift，并返回 summary + timeline（markdown）。"""
+    """基于 state JSON + replies 目录运行 trace-drift，并返回 summary + timeline（markdown）+ 可读解释。"""
     if not state_path or not replies_dir:
-        return "请先填写 state 和 replies 目录。", ""
+        return "请先填写 state 和 replies 目录。", "", ""
 
     state = Path(state_path)
     replies = Path(replies_dir)
     if not state.exists():
-        return f"找不到状态文件: {state}", ""
+        return f"找不到状态文件: {state}", "", ""
     if not replies.exists() or not replies.is_dir():
-        return f"找不到回复目录: {replies}", ""
+        return f"找不到回复目录: {replies}", "", ""
 
     out_json = OUTPUTS / "trace_drift.json"
     out_md = OUTPUTS / "trace_drift.md"
@@ -155,12 +158,12 @@ def trace_drift_ui(state_path: str, replies_dir: str):
         ]
     )
     if code != 0 or not out_json.exists():
-        return f"trace-drift 失败。\nstdout:\n{out}\n\nstderr:\n{err}", ""
+        return f"trace-drift 失败。\nstdout:\n{out}\n\nstderr:\n{err}", "", ""
 
     try:
         jd = json.loads(out_json.read_text(encoding="utf-8"))
     except Exception as e:
-        return f"读取 trace_drift.json 失败: {e}", ""
+        return f"读取 trace_drift.json 失败: {e}", "", ""
 
     summary = jd.get("summary", {})
     summary_text = json.dumps(summary, ensure_ascii=False, indent=2)
@@ -170,7 +173,9 @@ def trace_drift_ui(state_path: str, replies_dir: str):
     else:
         timeline_md = json.dumps(jd, ensure_ascii=False, indent=2)
 
-    return summary_text, timeline_md
+    readable = explain_trace_drift(jd)
+
+    return summary_text, timeline_md, readable
 
 
 def build_app() -> gr.Blocks:
@@ -204,10 +209,11 @@ def build_app() -> gr.Blocks:
             btn_check = gr.Button("Check Drift")
             report_box = gr.Textbox(label="Drift report", lines=16)
             status_box = gr.Textbox(label="final_status", lines=1)
+            readable_box = gr.Textbox(label="Readable Summary", lines=6)
             btn_check.click(
                 check_ui,
                 inputs=[answer_box, imported_state_path],
-                outputs=[report_box, status_box],
+                outputs=[report_box, status_box, readable_box],
             )
 
         with gr.Tab("4. Trace Drift"):
@@ -217,10 +223,68 @@ def build_app() -> gr.Blocks:
             btn_trace = gr.Button("Run trace-drift")
             summary_box = gr.Textbox(label="Summary (JSON)", lines=8)
             timeline_box = gr.Textbox(label="Timeline (markdown)", lines=20)
+            readable_trace_box = gr.Textbox(label="Readable Summary", lines=6)
             btn_trace.click(
                 trace_drift_ui,
                 inputs=[state_in, replies_in],
-                outputs=[summary_box, timeline_box],
+                outputs=[summary_box, timeline_box, readable_trace_box],
+            )
+
+        with gr.Tab("5. Live Guard"):
+            gr.Markdown("v2：显式 runtime wrapper = prepare + model call + check + explain（mock 或 OpenAI）。")
+            state_in = gr.Textbox(label="State file", value="outputs/imported_state_demo.json")
+            provider_in = gr.Dropdown(label="Provider", choices=["mock", "openai"], value="mock")
+            scenario_in = gr.Dropdown(label="Mock scenario（仅 mock 时有效）", choices=["clean", "drift"], value="clean")
+            provider_model_in = gr.Textbox(label="Provider model（仅 openai 时有效）", value="gpt-4o-mini")
+            prompt_in = gr.Textbox(label="User prompt", lines=4, value="Optimize todo loading for 5000+ items.")
+            btn_live = gr.Button("Run Live Guard")
+
+            enhanced_out = gr.Textbox(label="Enhanced prompt", lines=10)
+            response_out = gr.Textbox(label="AI response", lines=10)
+            guard_json_out = gr.Textbox(label="Guard result (JSON)", lines=10)
+            readable_out = gr.Textbox(label="Readable Summary", lines=8)
+
+            def live_guard_ui(
+                state_path: str,
+                provider: str,
+                scenario: str,
+                provider_model: str,
+                user_prompt: str,
+            ):
+                if not state_path or not user_prompt:
+                    return "", "", "请先填写 state 和 prompt。", ""
+                args = [
+                    "guard-chat",
+                    "--state",
+                    state_path,
+                    "--model",
+                    provider or "mock",
+                    "--scenario",
+                    scenario or "clean",
+                    "--prompt",
+                    user_prompt,
+                    "--out",
+                    str(OUTPUTS / "live_guard_result.json"),
+                ]
+                if (provider or "mock").strip().lower() == "openai" and (provider_model or "").strip():
+                    args.extend(["--provider-model", (provider_model or "gpt-4o-mini").strip()])
+                code, out, err = _run_cli(args)
+                if code != 0:
+                    return "", "", f"guard-chat 失败。\nstdout:\n{out}\n\nstderr:\n{err}", ""
+                try:
+                    jd = json.loads((OUTPUTS / "live_guard_result.json").read_text(encoding="utf-8"))
+                except Exception as e:
+                    return "", "", f"读取 live_guard_result.json 失败: {e}", ""
+                enhanced = jd.get("enhanced_prompt", "")
+                resp = jd.get("ai_response", "")
+                guard_res = jd.get("guard_result", {})
+                readable = jd.get("readable_summary", "")
+                return enhanced, resp, json.dumps(guard_res, ensure_ascii=False, indent=2), readable
+
+            btn_live.click(
+                live_guard_ui,
+                inputs=[state_in, provider_in, scenario_in, provider_model_in, prompt_in],
+                outputs=[enhanced_out, response_out, guard_json_out, readable_out],
             )
 
     return demo
